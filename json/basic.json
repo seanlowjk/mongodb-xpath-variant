@@ -1,0 +1,20 @@
+{
+    "person": {
+        "name": "Sean", 
+        "schools": [
+            {
+                "name": "NUS"
+            }
+        ]
+    }, 
+    "schools": [
+        {
+            "name": "NUS", 
+            "country": "Singapore"
+        },
+        {
+            "name": "NTU", 
+            "country": "Singapore"
+        }
+    ]
+}
