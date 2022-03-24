@@ -2,7 +2,11 @@ from functools import reduce
 from objects.expression import Expression
 
 from objects.path import Path 
-from utils.constants import STARTER_COMP_OPERATORS, XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, Operators, Predicate
+from utils.constants import (
+    STARTER_COMP_OPERATORS, BINARY_OPERATORS, 
+    XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, 
+    Operators, Predicate
+)
 from utils.tokeniser import Tokeniser
 
 
@@ -15,6 +19,9 @@ class Lexer:
 
     def is_seperator(self, keyword):
         return keyword == STEP_SEPERATOR
+
+    def is_binary_op(self, keyword):
+        return keyword in BINARY_OPERATORS
 
 
 class Parser:
@@ -109,12 +116,12 @@ class Parser:
                 word = self.peek_token()
                 if word == '"':
                     break 
-                val = val + self.eat_token()
+                val = val + self.eat_token() + " "
             end_tok = self.eat_keyword(lambda a: a == '"')
             if end_tok is None:
                 return None 
             else: 
-                return val 
+                return val.strip()
         elif tok == "'":
             val = ""
             self.eat_token()
@@ -122,12 +129,12 @@ class Parser:
                 word = self.peek_token()
                 if word == "'":
                     break 
-                val = val + self.eat_token()
+                val = val + self.eat_token() + " "
             end_tok = self.eat_keyword(lambda a: a == "'")
             if end_tok is None:
                 return None 
             else: 
-                return val 
+                return val.strip()
         elif tok.isalnum():
             return self.eat_alnum()
         else:
@@ -136,15 +143,13 @@ class Parser:
     def eat_expression(self):
         path = self.eat_path(False)
         op = self.eat_op()
-        val = self.eat_value()
-        print(path, op, val)
+        val = self.eat_value() 
         return Expression(path, op, val)
 
     def eat_predicate(self):
         left_brac = self.eat_keyword(lambda a : a == Predicate.LEFT_BRACKET.value)
         expr = self.eat_expression() 
         right_brac = self.eat_keyword(lambda a : a == Predicate.RIGHT_BRACKET.value)
-
         is_syntax_correct = reduce(lambda a, b: a and b is not None, [left_brac, expr, right_brac])
         if not is_syntax_correct:
             return None 

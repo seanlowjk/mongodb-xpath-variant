@@ -1,4 +1,5 @@
 from enum import Enum
+from msilib.schema import Binary
 
 
 # Axes Related 
@@ -46,3 +47,5 @@ STARTER_COMP_OPERATORS = ['<', '>', '=', '!']
 class BinaryOperators(Enum):
     AND = 'and'
     OR = 'or'
+
+BINARY_OPERATORS = [op.value for op in BinaryOperators]
