@@ -9,12 +9,12 @@ class Tokeniser:
 
     # consumes the token
     def next(self):
-        if self.ptr >= len(self.input):
-            return None
-
         if len(self.buffer) > 0:
             token = self.buffer.pop(0)
             return token
+
+        if self.ptr >= len(self.input):
+            return None
 
         if self.input[self.ptr].isspace():
             self.cleanSpace()
@@ -29,11 +29,11 @@ class Tokeniser:
 
     # peeks what is the next string, doesnt consume
     def peek_next(self) -> String:
-        if self.ptr >= len(self.input):
-            return None
-
         if len(self.buffer) != 0:
             return self.buffer[0]
+
+        if self.ptr >= len(self.input):
+            return None
 
         if self.input[self.ptr].isspace():
             self.cleanSpace()
