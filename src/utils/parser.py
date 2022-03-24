@@ -1,5 +1,6 @@
 from functools import reduce
-from objects.expression import Expression
+
+from objects.expression import BinaryExpression, Expression
 
 from objects.path import Path 
 from utils.constants import (
@@ -146,15 +147,31 @@ class Parser:
         val = self.eat_value() 
         return Expression(path, op, val)
 
+    def eat_binary_expression(self, prev_expr=None, prev_bin_op=None):
+        expr = self.eat_expression()
+        next = self.peek_token()
+        if next == Predicate.RIGHT_BRACKET.value:
+            self.eat_keyword(lambda a : a == Predicate.RIGHT_BRACKET.value)
+            if prev_expr is None:
+                return expr 
+            else:
+                return BinaryExpression(prev_expr, prev_bin_op, expr)
+        elif self.lexer.is_binary_op(next):
+            if not prev_expr is None:
+                binary_expr = BinaryExpression(prev_expr, prev_bin_op, expr)
+            else:
+                binary_expr = expr
+            return self.eat_binary_expression(binary_expr, self.eat_token())
+        else:
+            return None
+
     def eat_predicate(self):
         left_brac = self.eat_keyword(lambda a : a == Predicate.LEFT_BRACKET.value)
-        expr = self.eat_expression() 
-        right_brac = self.eat_keyword(lambda a : a == Predicate.RIGHT_BRACKET.value)
-        is_syntax_correct = reduce(lambda a, b: a and b is not None, [left_brac, expr, right_brac])
-        if not is_syntax_correct:
+
+        if left_brac is None:
             return None 
 
-        return expr
+        return self.eat_binary_expression()
         
     def run(self):
         while self.tokeniser.has_next():
