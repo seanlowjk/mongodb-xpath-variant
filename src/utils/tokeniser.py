@@ -24,6 +24,9 @@ class Tokeniser:
         else:
             return self.nextSymbol()
 
+    def has_next(self):
+        return not self.peek_next() is None
+
     # peeks what is the next string, doesnt consume
     def peek_next(self) -> String:
         if self.ptr >= len(self.input):
@@ -31,7 +34,7 @@ class Tokeniser:
 
         if len(self.buffer) != 0:
             return self.buffer[0]
- 
+
         if self.input[self.ptr].isspace():
             self.cleanSpace()
 
@@ -70,4 +73,3 @@ class Tokeniser:
                 self.ptr += 1
 
         return "".join(tokens)
-

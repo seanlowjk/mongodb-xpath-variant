@@ -1,3 +1,4 @@
-from utils.parser import run 
+from utils.parser import Parser
 
-run()
+p = Parser("/child::bookstore/descendant::book")
+p.run() 
