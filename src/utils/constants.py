@@ -30,3 +30,19 @@ class Predicate(Enum):
     RIGHT_BRACKET = "]"
     LEFT_PARANTHESIS = "("
     RIGHT_PARANTHESIS = ")"
+
+# Comparison Operatored Related 
+class Operators(Enum):
+    LT = '<'
+    LE = '<='
+    GT = '>'
+    GE = '>='
+    EQ = '='
+    NE = '!='
+
+STARTER_COMP_OPERATORS = ['<', '>', '=', '!']
+ 
+# Binary Operators Related 
+class BinaryOperators(Enum):
+    AND = 'and'
+    OR = 'or'
