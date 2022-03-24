@@ -23,7 +23,7 @@ class Parser:
         self.lexer = Lexer()
 
     def peek_token(self):
-        self.tokeniser.peek_next()
+        return self.tokeniser.peek_next()
 
     def eat_token(self):
         return self.tokeniser.next()
@@ -48,8 +48,12 @@ class Parser:
     def eat_seperator(self):
         return self.eat_keyword(self.lexer.is_seperator)   
 
-    def eat_path(self):
-        backslash = self.eat_backslash()
+    def eat_path(self, has_backslash=True):
+        if has_backslash:
+            backslash = self.eat_backslash()
+        else: 
+            backslash = "/"
+            
         axis = self.eat_axis()
         sepeator = self.eat_seperator()
         name = self.eat_token()
@@ -99,34 +103,47 @@ class Parser:
     def eat_value(self):
         tok = self.peek_token()
         if tok == '"':
-            word = self.eat_alnum()
+            self.eat_token()
+            val = ""
+            while True: 
+                word = self.peek_token()
+                if word == '"':
+                    break 
+                val = val + self.eat_token()
             end_tok = self.eat_keyword(lambda a: a == '"')
-            if word is None or end_tok is None:
+            if end_tok is None:
                 return None 
             else: 
-                return word 
+                return val 
         elif tok == "'":
-            word = self.eat_alnum()
+            val = ""
+            self.eat_token()
+            while True: 
+                word = self.peek_token()
+                if word == "'":
+                    break 
+                val = val + self.eat_token()
             end_tok = self.eat_keyword(lambda a: a == "'")
-            if word is None or end_tok is None:
+            if end_tok is None:
                 return None 
             else: 
-                return word 
+                return val 
         elif tok.isalnum():
             return self.eat_alnum()
         else:
             return None
             
     def eat_expression(self):
-        path = self.eat_path()
+        path = self.eat_path(False)
         op = self.eat_op()
         val = self.eat_value()
+        print(path, op, val)
         return Expression(path, op, val)
 
     def eat_predicate(self):
-        left_brac = self.eat_keyword(lambda a : a == Predicate.LEFT_BRACKET)
+        left_brac = self.eat_keyword(lambda a : a == Predicate.LEFT_BRACKET.value)
         expr = self.eat_expression() 
-        right_brac = self.eat_keyword(lambda a : a == Predicate.RIGHT_BRACKET)
+        right_brac = self.eat_keyword(lambda a : a == Predicate.RIGHT_BRACKET.value)
 
         is_syntax_correct = reduce(lambda a, b: a and b is not None, [left_brac, expr, right_brac])
         if not is_syntax_correct:
@@ -136,5 +153,14 @@ class Parser:
         
     def run(self):
         while self.tokeniser.has_next():
-            tok = self.eat_token()
-            print(tok)
+            tok = self.peek_token()
+            if tok == STEP_STARTER:
+                path = self.eat_path()
+                print(path)
+            elif tok == Predicate.LEFT_BRACKET.value:
+                expr = self.eat_predicate()
+                print(expr)
+            else:
+                print(tok)
+                return 
+
