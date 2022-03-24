@@ -29,6 +29,9 @@ class Tokeniser:
         if self.ptr >= len(self.input):
             return None
 
+        if len(self.buffer) != 0:
+            return self.buffer[0]
+ 
         if self.input[self.ptr].isspace():
             self.cleanSpace()
 
