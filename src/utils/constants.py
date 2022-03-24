@@ -21,4 +21,4 @@ class Axes(Enum):
 
 STEP_STARTER = "/"
 STEP_SEPERATOR = "::"
-XPATH_AXES = [axes for axes in Axes]
+XPATH_AXES = [axes.value for axes in Axes]
