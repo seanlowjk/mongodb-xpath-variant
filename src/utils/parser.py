@@ -1,5 +1,8 @@
+from functools import reduce
+from objects.expression import Expression
+
 from objects.path import Path 
-from utils.constants import XPATH_AXES, STEP_STARTER, STEP_SEPERATOR
+from utils.constants import XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, Predicate
 from utils.tokeniser import Tokeniser
 
 
@@ -43,11 +46,31 @@ class Parser:
         return self.eat_keyword(self.lexer.is_seperator)   
 
     def eat_path(self):
-        self.eat_backslash()
+        backslash = self.eat_backslash()
         axis = self.eat_axis()
-        self.eat_seperator()
+        sepeator = self.eat_seperator()
         name = self.eat_string()
+        
+        is_syntax_correct = reduce(lambda a, b: a and b is not None, [backslash, axis, sepeator, name])
+        if not is_syntax_correct:
+            return None 
+
         return Path(axis, name)
+
+    def eat_expression(self):
+        return Expression(None, None, None)
+
+    def eat_predicate(self):
+        left_brac = self.eat_keyword(lambda a : a == Predicate.LEFT_BRACKET)
+        expr = self.eat_expression() 
+        right_brac = self.eat_keyword(lambda a : a == Predicate.RIGHT_BRACKET)
+
+        is_syntax_correct = reduce(lambda a, b: a and b is not None, [left_brac, expr, right_brac])
+        if not is_syntax_correct:
+            return None 
+
+        return expr
+        
 
     def run(self):
         while self.tokeniser.has_next():
