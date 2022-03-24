@@ -1,4 +1,4 @@
-from tokeniser.tokeniser import Tokeniser
+from utils.tokeniser import Tokeniser
 
 tok = Tokeniser("/child::bookstore/descendant::book[position()<3]")
 token = tok.peek_next()
