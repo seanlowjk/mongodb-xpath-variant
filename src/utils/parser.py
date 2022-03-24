@@ -184,10 +184,10 @@ class Parser:
             tok = self.peek_token()
             if tok == STEP_STARTER:
                 path = self.eat_path()
-                print(path)
+                print("PATH: ", path)
             elif tok == Predicate.LEFT_BRACKET.value:
                 expr = self.eat_predicate()
-                print(expr)
+                print("EXPR: ", expr)
             else:
                 print(tok)
                 return 
