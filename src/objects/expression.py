@@ -2,10 +2,11 @@ from utils.constants import BinaryOperators
 
 
 class Expression: 
-    def __init__(self, path, op, value):
+    def __init__(self, path, op, value, value_type):
         self.path = path
         self.op = op 
         self.value = value
+        self.value_type = value_type
 
     def is_unary_expr(self):
         return True 
@@ -17,7 +18,10 @@ class Expression:
         return False
 
     def __str__(self):
-        return "{} {} {}".format(self.path, self.op, self.value)
+        if self.value_type == int:
+            return "{} {} int({})".format(self.path, self.op, self.value)
+        else:
+            return "{} {} str({})".format(self.path, self.op, self.value)
 
 class BinaryExpression:
     def __init__(self, expr_1, binary_op, expr_2):

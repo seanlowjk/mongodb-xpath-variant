@@ -125,9 +125,9 @@ class Parser:
                 val = val + self.eat_token() + " "
             end_tok = self.eat_keyword(lambda a: a == '"')
             if end_tok is None:
-                return None 
+                return None, None
             else: 
-                return val.strip()
+                return val.strip(), str
         elif tok == "'":
             val = ""
             self.eat_token()
@@ -138,19 +138,19 @@ class Parser:
                 val = val + self.eat_token() + " "
             end_tok = self.eat_keyword(lambda a: a == "'")
             if end_tok is None:
-                return None 
+                return  None, None 
             else: 
-                return val.strip()
-        elif tok.isalnum():
-            return self.eat_alnum()
+                return val.strip(), str
+        elif tok.isnumeric():
+            return self.eat_alnum(), int
         else:
-            return None
+            return  None, None
             
     def eat_expression(self):
         path = self.eat_path(False)
         op = self.eat_op()
-        val = self.eat_value() 
-        return Expression(path, op, val)
+        val, val_type = self.eat_value() 
+        return Expression(path, op, val, val_type)
 
     def eat_binary_expression(self, prev_expr=None, prev_bin_op=None):
         expr = self.eat_expression()
