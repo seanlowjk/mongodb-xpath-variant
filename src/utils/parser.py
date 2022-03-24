@@ -1,8 +1,7 @@
+from objects.path import Path 
 from utils.constants import XPATH_AXES, STEP_STARTER, STEP_SEPERATOR
 from utils.tokeniser import Tokeniser
 
-
-print(XPATH_AXES)
 
 class Lexer:
     def is_axis(self, keyword):
@@ -28,7 +27,6 @@ class Parser:
 
     def eat_keyword(self, filter_func):
         token = self.eat_string()
-        print(token)
 
         if token is None or not filter_func(token): 
             return None 
@@ -49,9 +47,9 @@ class Parser:
         axis = self.eat_axis()
         self.eat_seperator()
         name = self.eat_string()
-        print(axis, name)
+        return Path(axis, name)
 
     def run(self):
         while self.tokeniser.has_next():
-            self.eat_path()
-            print(1)
+            path = self.eat_path()
+            print(path)
