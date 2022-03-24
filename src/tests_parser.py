@@ -1,4 +1,4 @@
 from utils.parser import Parser
 
-p = Parser('/child::bookstore[child::owner = "Sean Low"]/child::hero[child::age<=18]')
+p = Parser('/child::a[child::b < 3 or child::c > 3 and child::d = 0]/child::e[child::f != 0]')
 p.run() 

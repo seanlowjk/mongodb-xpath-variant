@@ -89,7 +89,6 @@ class Parser:
                 self.eat_token()
                 return Operators.LE.value
             elif tok2.isalnum() or tok2 == '"' or tok2 == "'":
-                self.eat_token()
                 return Operators.LT.value 
             else:
                 return None
