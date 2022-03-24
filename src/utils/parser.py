@@ -2,7 +2,6 @@ from functools import reduce
 
 from objects.expression import BinaryExpression, Expression
 
-from objects.path import Path 
 from utils.constants import (
     STARTER_COMP_OPERATORS, BINARY_OPERATORS, 
     XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, 
@@ -29,6 +28,7 @@ class Parser:
     def __init__(self, input):
         self.tokeniser = Tokeniser(input)
         self.lexer = Lexer()
+        self.curr_path = ""
 
     def peek_token(self):
         return self.tokeniser.peek_next()
@@ -70,7 +70,13 @@ class Parser:
         if not is_syntax_correct:
             return None 
 
-        return Path(axis, name)
+        output_path = axis + "::" + name
+        if has_backslash:
+            self.curr_path = self.curr_path + "/" + output_path
+        else:
+            output_path = self.curr_path + "/" + output_path
+
+        return output_path
 
     def eat_op(self):
         tok = self.eat_token()
