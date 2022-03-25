@@ -1,6 +1,7 @@
 from functools import reduce
 
 from objects.expression import BinaryExpression, Expression
+from objects.path import Path
 
 from utils.constants import (
     STARTER_COMP_OPERATORS, BINARY_OPERATORS, 
@@ -77,7 +78,7 @@ class Parser:
         else:
             output_path = self.curr_path + "/" + output_path
 
-        return output_path
+        return Path(output_path)
 
     def eat_op(self):
         tok = self.eat_token()
