@@ -186,6 +186,7 @@ class Parser:
             if tok == STEP_STARTER:
                 path = self.eat_path()
                 print("PATH: ", path)
+                print(path.get_levels())
             elif tok == Predicate.LEFT_BRACKET.value:
                 expr = self.eat_predicate()
                 print("EXPR: ", expr)
