@@ -73,6 +73,7 @@ class Parser:
         output_path = axis + "::" + name
         if has_backslash:
             self.curr_path = self.curr_path + "/" + output_path
+            output_path = self.curr_path
         else:
             output_path = self.curr_path + "/" + output_path
 
