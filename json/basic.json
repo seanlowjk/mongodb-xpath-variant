@@ -1,20 +1,30 @@
 {
-    "person": {
-        "name": "Sean", 
-        "schools": [
+    "x": {
+        "a": [
             {
-                "name": "NUS"
+                "b": "xxx",
+                "c": "5",
+                "d": "3",
+                "e": {
+                    "f": "3"
+                }
+            },
+            {
+                "b": "aa",
+                "c": "2",
+                "d": "3",
+                "e": {
+                    "f": "2"
+                }
+            },
+            {
+                "b": "xx",
+                "c": "2",
+                "d": "0",
+                "e": {
+                    "f": "1"
+                }
             }
         ]
-    }, 
-    "schools": [
-        {
-            "name": "NUS", 
-            "country": "Singapore"
-        },
-        {
-            "name": "NTU", 
-            "country": "Singapore"
-        }
-    ]
+    }
 }
