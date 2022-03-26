@@ -11,4 +11,10 @@ class Path:
         return self.str_path
 
     def get_levels(self):
+        """
+        Returns the levels of the path 
+
+        For example /child::a/child::b will return 
+        [child::a, child::b]
+        """
         return self.levels 

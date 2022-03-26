@@ -32,12 +32,28 @@ class Parser:
         self.curr_path = ""
 
     def peek_token(self):
+        """
+        Peeks the next token from the tokeniser.
+
+        Returns the token as a string. 
+        """
         return self.tokeniser.peek_next()
 
     def eat_token(self):
+        """
+        Eats the next token from the tokeniser. 
+
+        Returns the token as a string. 
+        """
         return self.tokeniser.next()
 
     def eat_keyword(self, filter_func):
+        """
+        Eats a keyword based on a filter function. 
+
+        If the filter function evaluations to true, the 
+        keyword will be returned as a string. 
+        """
         token = self.peek_token()
 
         if token is None or not filter_func(token): 
@@ -46,18 +62,45 @@ class Parser:
             return self.eat_token()
 
     def eat_alnum(self):
+        """
+        Eats a keyword as long as it is alphanumeric. 
+
+        Returns the token as a string. 
+        """
         return self.eat_keyword(lambda a : a.isalnum())
 
     def eat_axis(self):
+        """
+        Eats a keyword as long as it is in the form 
+        of an XPath axes. 
+
+        Returns the token as a string. 
+        """
         return self.eat_keyword(self.lexer.is_axis)
 
     def eat_backslash(self):
+        """
+        Eats a keyword as long as it is a backslash. 
+
+        Returns the token as a string. 
+        """
         return self.eat_keyword(self.lexer.is_backslash)   
 
     def eat_seperator(self):
+        """
+        Eats a keyword as long as it is a double colon (::). 
+
+        Returns the token as a string. 
+        """
         return self.eat_keyword(self.lexer.is_seperator)   
 
     def eat_path(self, has_backslash=True):
+        """
+        Eats a path as long as it is in the correct long-form format. 
+
+        Returns the path as an object.
+        Refer to objects/path.py
+        """
         if has_backslash:
             backslash = self.eat_backslash()
         else: 
@@ -81,6 +124,12 @@ class Parser:
         return Path(output_path)
 
     def eat_op(self):
+        """
+        Eats a keyword so long as it is a binary operator 
+        for example: <=, <, !=, =, >, >=
+
+        Returns the operation as a string. 
+        """
         tok = self.eat_token()
         if not tok in STARTER_COMP_OPERATORS:
             return None 
@@ -116,6 +165,14 @@ class Parser:
             return None 
 
     def eat_value(self):
+        """
+        Eats a keyword so long as it is a value 
+
+        Returns the value as a tuple:
+            the first element contains the value 
+            the second element contains the type of the value 
+                (str or int)
+        """
         tok = self.peek_token()
         if tok == '"':
             self.eat_token()
@@ -149,12 +206,25 @@ class Parser:
             return  None, None
             
     def eat_expression(self):
+        """
+        Eats an expression in the form of (path op value)
+
+        Returns the expression as an object 
+        Refer to objects/expression.py
+        """
         path = self.eat_path(False)
         op = self.eat_op()
         val, val_type = self.eat_value() 
         return Expression(path, op, val, val_type)
 
     def eat_binary_expression(self, prev_expr=None, prev_bin_op=None):
+        """
+        Eats an expression in the form of (path op value) and (path op value)
+            OR (path op value) or (path op value)
+
+        Returns the expression as an object 
+        Refer to objects/expression.py
+        """
         expr = self.eat_expression()
         next = self.peek_token()
         if next == Predicate.RIGHT_BRACKET.value:
@@ -173,6 +243,11 @@ class Parser:
             return None
 
     def eat_predicate(self):
+        """
+        Eats a predicate in the form of [ expr* ]
+
+        Returns the predicate in the form of an expression
+        """
         left_brac = self.eat_keyword(lambda a : a == Predicate.LEFT_BRACKET.value)
 
         if left_brac is None:
@@ -181,6 +256,9 @@ class Parser:
         return self.eat_binary_expression()
         
     def run(self):
+        """
+        TODO: Return the results and pass it to evaluator / executor.
+        """
         while self.tokeniser.has_next():
             tok = self.peek_token()
             if tok == STEP_STARTER:
