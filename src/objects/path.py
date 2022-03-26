@@ -1,4 +1,4 @@
-from utils.constants import STEP_STARTER
+from utils.constants import STEP_STARTER, STEP_SEPERATOR
 
 
 class Path:
@@ -18,3 +18,12 @@ class Path:
         [child::a, child::b]
         """
         return self.levels 
+
+    def get_attribute(self):
+        """
+        Gets the desired attribute. 
+        """
+        if len(self.levels) == 0:
+            return None 
+
+        return self.levels[-1].split(STEP_SEPERATOR)[1]

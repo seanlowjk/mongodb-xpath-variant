@@ -11,11 +11,17 @@ class Expression:
     def is_unary_expr(self):
         return True 
 
+    def is_binary_expr(self):
+        return False
+
     def is_or_expr(self):
         return False
 
     def is_and_expr(self):
         return False
+
+    def to_parts(self):
+        return self.path, self.op, self.value, self.value_type
 
     def __str__(self):
         if self.value_type == int:
@@ -32,11 +38,17 @@ class BinaryExpression:
     def is_unary_expr(self):
         return False 
 
+    def is_binary_expr(self):
+        return True
+
     def is_or_expr(self):
         return self.binary_op == BinaryOperators.OR.value 
 
     def is_and_expr(self):
         return self.binary_op == BinaryOperators.AND.value 
+
+    def to_parts(self):
+        return self.expr_1, self.binary_op, self.expr_2
 
     def __str__(self):
         return "{} {} {}".format(self.expr_1, self.binary_op, self.expr_2)
