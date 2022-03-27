@@ -254,24 +254,28 @@ class Parser:
         
     def run(self):
         """
-        Returns the paths and expressions in the form of two lists:
+        Returns the paths and expressions in the form of three lists:
             1. List of Levels 
             2. List of Expressions 
+            3. List of Steps to take (concatenation of 1 and 2)
         """
         paths = []
         expressions = []
+        steps = []
         while self.tokeniser.has_next():
             tok = self.peek_token()
             if tok == STEP_STARTER:
                 path = self.eat_path()
                 paths.append(path)
+                steps.append(path)
             elif tok == Predicate.LEFT_BRACKET.value:
                 expr = self.eat_predicate()
                 expressions.append(expr)
+                steps.append(expr)
             else:
                 print(tok)
 
-        return paths, expressions
+        return paths, expressions, steps
 
             
 
