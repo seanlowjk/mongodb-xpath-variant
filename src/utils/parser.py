@@ -5,7 +5,7 @@ from objects.path import Path
 
 from utils.constants import (
     STARTER_COMP_OPERATORS, BINARY_OPERATORS, STEP_AT, STEP_DOT, STEP_DOTDOT, 
-    XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, 
+    XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, Axes, 
     Operators, Predicate
 )
 from utils.tokeniser import Tokeniser
@@ -76,7 +76,54 @@ class Parser:
 
         Returns the token as a string. 
         """
-        return self.eat_keyword(self.lexer.is_axis)
+        keyword = self.eat_keyword(self.lexer.is_axis)
+
+        if keyword == Axes.FOLLOWING.value and self.peek_token() == "-":
+            self.eat_token()
+            if self.peek_token() == "sibling":
+                self.eat_token() 
+                return Axes.FOLLOWING_SIBLING.value
+            else:
+                return None
+        elif keyword == Axes.PRECEDING.value and self.peek_token() == "-":
+            self.eat_token()
+            if self.peek_token() == "sibling":
+                self.eat_token() 
+                return Axes.PRECEDING_SIBLING.value
+            else:
+                return None
+        elif keyword == Axes.ANCESTOR.value and self.peek_token() == "-":
+            self.eat_token()
+            if self.peek_token() == "or":
+                self.eat_token()
+                if self.peek_token() == "-":
+                    self.eat_token() 
+                    if self.peek_token() == "self":
+                        self.eat_token() 
+                        return Axes.ANCESTOR_OR_SELF.value
+                    else:
+                        return None
+                else:
+                    return None
+            else:
+                return None
+        elif keyword == Axes.DESCENDANT.value and self.peek_token() == "-":
+            self.eat_token()
+            if self.peek_token() == "or":
+                self.eat_token()
+                if self.peek_token() == "-":
+                    self.eat_token() 
+                    if self.peek_token() == "self":
+                        self.eat_token() 
+                        return Axes.DESCENDANT_OR_SELF.value
+                    else:
+                        return None
+                else:
+                    return None
+            else:
+                return None
+
+        return keyword
 
     def eat_backslash(self):
         """
