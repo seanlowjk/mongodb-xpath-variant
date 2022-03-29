@@ -23,6 +23,9 @@ class Axes(Enum):
 # Path Related 
 STEP_STARTER = "/"
 STEP_SEPERATOR = "::"
+STEP_DOT = "."
+STEP_DOTDOT = ".."
+STEP_AT = "@"
 XPATH_AXES = [axes.value for axes in Axes]
 
 # Predicate Related 

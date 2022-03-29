@@ -66,7 +66,10 @@ class Tokeniser:
         tokens.append(self.input[self.ptr])
         self.ptr += 1
 
-        if tokens[0] == "/" or tokens[0] == ":":
+        if self.ptr >= len(self.input):
+            return "".join(tokens)
+
+        if tokens[0] == "/" or tokens[0] == ":" or tokens[0] == ".":
             next_tok = self.input[self.ptr]
             if tokens[0] == next_tok:
                 tokens.append(next_tok)

@@ -4,7 +4,7 @@ from objects.expression import BinaryExpression, Expression
 from objects.path import Path
 
 from utils.constants import (
-    STARTER_COMP_OPERATORS, BINARY_OPERATORS, 
+    STARTER_COMP_OPERATORS, BINARY_OPERATORS, STEP_AT, STEP_DOT, STEP_DOTDOT, 
     XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, 
     Operators, Predicate
 )
@@ -94,23 +94,41 @@ class Parser:
         """
         return self.eat_keyword(self.lexer.is_seperator)   
 
+    def eat_step(self, has_backslash=True):
+        """
+        Eats a step as long as it is in the correct long-form format. 
+
+        Returns the step depending on what is needed. 
+        """   
+        if has_backslash:
+            self.eat_backslash()
+        tok = self.peek_token()
+
+        if tok == STEP_DOT:
+            return self.eat_token()
+        elif tok == STEP_DOTDOT:
+            return self.eat_token()
+        elif tok == STEP_AT: 
+            self.eat_token()
+            return self.eat_token()
+        elif self.lexer.is_axis(tok):
+            return self.eat_path(has_backslash)
+        else:
+            return 
+
+
     def eat_path(self, has_backslash=True):
         """
         Eats a path as long as it is in the correct long-form format. 
 
         Returns the path as an object.
         Refer to objects/path.py
-        """
-        if has_backslash:
-            backslash = self.eat_backslash()
-        else: 
-            backslash = "/"
-            
+        """            
         axis = self.eat_axis()
         sepeator = self.eat_seperator()
         name = self.eat_token()
         
-        is_syntax_correct = reduce(lambda a, b: a and b is not None, [backslash, axis, sepeator, name])
+        is_syntax_correct = reduce(lambda a, b: a and b is not None, [STEP_SEPERATOR, axis, sepeator, name])
         if not is_syntax_correct:
             return None 
 
@@ -265,7 +283,7 @@ class Parser:
         while self.tokeniser.has_next():
             tok = self.peek_token()
             if tok == STEP_STARTER:
-                path = self.eat_path()
+                path = self.eat_step()
                 paths.append(path)
                 steps.append(path)
             elif tok == Predicate.LEFT_BRACKET.value:
@@ -274,6 +292,7 @@ class Parser:
                 steps.append(expr)
             else:
                 print(tok)
+                self.tokeniser.next()
 
         return paths, expressions, steps
 
