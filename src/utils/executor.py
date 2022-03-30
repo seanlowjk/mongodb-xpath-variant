@@ -1,18 +1,26 @@
-from json import load
+from json import load, dumps
 from numpy import identity
 from pyjsonq import JsonQ
 from genson import SchemaBuilder
-
-import constants
+from pymongo import MongoClient
 
 class Executor:
     def __init__(self, json_file_path):
         self.json_file_path = json_file_path
         self.qe = JsonQ(self.json_file_path)
         self.builder = SchemaBuilder()
+        self.db = MongoClient()["test"]
 
     def get_json_data(self):
-        self.json_data = load(open(self.json_file_path))
+        self.json_data = self.get_random_document()
+
+    def get_random_document(self):
+        results = self.db.library.aggregate( \
+            [{ "$sample": { "size": 1 } }] \
+        )
+        result = list(results)[0]
+        del result['_id']
+        return result
 
     '''
     Retrieves schema in JSON format in self.keys
@@ -21,7 +29,8 @@ class Executor:
         self.builder.add_object(self.json_data)        
         schema = self.builder.to_schema()
         qe = JsonQ(data=schema)
-        self.keys = qe.at('properties')
+        return schema
+        # self.keys = qe.at('properties')
         # print(self.keys.get())
 
         # next_level = self.keys.at('x').at('properties').at('a')
