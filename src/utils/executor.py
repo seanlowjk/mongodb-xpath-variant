@@ -9,6 +9,7 @@ class Executor:
         self.json_file_path = json_file_path
         self.qe = JsonQ(self.json_file_path)
         self.builder = SchemaBuilder()
+
         self.db = MongoClient()["test"]
 
     def get_json_data(self):
@@ -22,23 +23,51 @@ class Executor:
         del result['_id']
         return result
 
-    '''
-    Retrieves schema in JSON format in self.keys
-    '''
     def get_schema(self):
         self.builder.add_object(self.json_data)        
         schema = self.builder.to_schema()
-        qe = JsonQ(data=schema)
-        return schema
-        # self.keys = qe.at('properties')
-        # print(self.keys.get())
 
-        # next_level = self.keys.at('x').at('properties').at('a')
-        # next level down should either be items or properties (check their keys first)
-        # print(next_level.get().keys())
-        # print(self.keys.get())
+        if not "properties" in schema:
+            return []
 
-    def evaluate_data(self, levels, exprs):
+        schema_fields = set()
+
+        def get_field(path, key):
+            if path == "":
+                return key 
+
+            return path + "." + key
+
+        def append_fields(sub_schema, path=""):
+            if "properties" not in sub_schema:
+                for key in sub_schema:
+                    if key == "items":
+                        append_fields(sub_schema[key], path)
+                        schema_fields.add(path)
+                        return 
+                    elif key != "type":
+                        schema_fields.add(get_field(path, key))
+                schema_fields.add(path)
+            else:
+                sub_schema = sub_schema["properties"]
+                for key in sub_schema:
+                    if key != "type":
+                        append_fields(sub_schema[key], get_field(path, key))
+
+                if path != "":
+                    schema_fields.add(path)      
+
+        append_fields(schema)
+        print(sorted(schema_fields))
+        return sorted(schema_fields)
+
+    def evaluate_steps(self, steps):
+        for step in steps:
+            if step.__class__.__name__ == "Path":
+                axes, attr = step.get_parts()
+                print(axes, attr)
+            
+    def evaluate_data(self, levels, exprs, steps):
         expr_iter = 0
         self.curr_path = ''
         for level in levels:
@@ -69,7 +98,7 @@ class Executor:
                     path, op, value, value_type = expr.to_parts()
                 else:
                     path, op, value = expr.to_parts()
-                path_axis, path_identity = path.split('::')
+                path_axis, path_identity = path.get_levels()
 
                 self.curr_path = self.qe.at(identity).where(path_identity, op, value) 
 
