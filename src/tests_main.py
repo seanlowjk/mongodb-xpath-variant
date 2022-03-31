@@ -5,7 +5,7 @@ from utils.parser import Parser
 inferencer = Executor("json/basic.json")
 data = inferencer.get_json_data()
 
-p = Parser('/child::songs/child::song/child::title')
+p = Parser('/child::title')
 paths, exprs, steps = p.run() 
 
 result = inferencer.evaluate_json_data(steps)

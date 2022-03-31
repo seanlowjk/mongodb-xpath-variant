@@ -15,6 +15,9 @@ class Executor:
 
         self.collection = MongoClient()[db][collection]
 
+    def get_json_data_all(self):
+        return list(self.collection.find())
+
     def get_json_data(self):
         self.json_data = self.get_random_document()
 
@@ -94,10 +97,10 @@ class Executor:
 
     def evaluate_json_data(self, steps, data=None): 
         if data is None: 
-            data = self.json_data
+            data = self.get_json_data_all()
 
         paths = self.evaluate_steps(steps)
-        results = [data]
+        results = data
 
         def split_path(path):
             return path.split(".")
