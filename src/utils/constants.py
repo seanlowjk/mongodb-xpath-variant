@@ -21,6 +21,7 @@ class Axes(Enum):
 
 # Path Related 
 STEP_STARTER = "/"
+DESC_SHORT = "//"
 STEP_SEPERATOR = "::"
 STEP_DOT = "."
 STEP_DOTDOT = ".."

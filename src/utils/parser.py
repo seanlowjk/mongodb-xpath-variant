@@ -4,7 +4,7 @@ from objects.expression import BinaryExpression, Expression
 from objects.path import Path
 
 from utils.constants import (
-    STARTER_COMP_OPERATORS, BINARY_OPERATORS, STEP_AT, STEP_DOT, STEP_DOTDOT, 
+    DESC_SHORT, STARTER_COMP_OPERATORS, BINARY_OPERATORS, STEP_AT, STEP_DOT, STEP_DOTDOT, 
     XPATH_AXES, STEP_STARTER, STEP_SEPERATOR, Axes, 
     Operators, Predicate
 )
@@ -316,6 +316,17 @@ class Parser:
             return None 
 
         return self.eat_binary_expression()
+
+    def eat_short_descendant(self):
+        """
+        Eats the descendant in the form of //attr
+
+        Returns the path associated with the descendant attribute 
+        """
+        self.eat_keyword(lambda a: a == DESC_SHORT)
+        tok = self.eat_token()
+        path = Path("descendant::{}".format(tok))
+        return path 
         
     def run(self):
         """
@@ -337,6 +348,10 @@ class Parser:
                 expr = self.eat_predicate()
                 expressions.append(expr)
                 steps.append(expr)
+            elif tok == DESC_SHORT:
+                path = self.eat_short_descendant()
+                paths.append(path)
+                steps.append(path)
             else:
                 self.tokeniser.next()
 
