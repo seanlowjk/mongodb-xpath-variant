@@ -8,8 +8,9 @@ data = inferencer.get_json_data()
 p = Parser('/child::songs/child::song/child::title')
 paths, exprs, steps = p.run() 
 
-print(inferencer.get_schema())
-print(inferencer.evaluate_steps(steps))
+result = inferencer.evaluate_json_data(steps)
+for res in result:
+    print(res)
 """ for key in schema:
     print(schema[key])
     print()

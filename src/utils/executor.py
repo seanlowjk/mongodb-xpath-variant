@@ -1,4 +1,5 @@
 from json import load, dumps
+from os import pathsep
 from numpy import identity
 from pyjsonq import JsonQ
 from genson import SchemaBuilder
@@ -7,18 +8,18 @@ from pymongo import MongoClient
 from utils.constants import Axes
 
 class Executor:
-    def __init__(self, json_file_path):
+    def __init__(self, json_file_path, db="test", collection="library"):
         self.json_file_path = json_file_path
         self.qe = JsonQ(self.json_file_path)
         self.builder = SchemaBuilder()
 
-        self.db = MongoClient()["test"]
+        self.collection = MongoClient()[db][collection]
 
     def get_json_data(self):
         self.json_data = self.get_random_document()
 
     def get_random_document(self):
-        results = self.db.library.aggregate( \
+        results = self.collection.aggregate( \
             [{ "$sample": { "size": 1 } }] \
         )
         result = list(results)[0]
@@ -91,11 +92,35 @@ class Executor:
 
         return curr_levels
 
-    def evaluate_json_data(self): 
-        path_steps = self.evaluate_steps()
+    def evaluate_json_data(self, steps, data=None): 
+        if data is None: 
+            data = self.json_data
+
+        paths = self.evaluate_steps(steps)
+        results = [data]
+
+        def split_path(path):
+            return path.split(".")
         
+        for path in paths:
+            for step in split_path(path):
+                temp_data = []
+
+                for temp in results:
+                    if step in temp:
+                        res = temp[step]
+                        if type(res).__name__ == "list":
+                            for res_elem in res: 
+                                temp_data.append(res_elem)
+                        else: 
+                            temp_data.append(res)
+                
+                results = temp_data
+
+        return results
+
                        
-    def evaluate_data(self, levels, exprs, steps):
+    """def evaluate_data(self, levels, exprs, steps):
         expr_iter = 0
         self.curr_path = ''
         for level in levels:
@@ -128,7 +153,7 @@ class Executor:
                     path, op, value = expr.to_parts()
                 path_axis, path_identity = path.get_levels()
 
-                self.curr_path = self.qe.at(identity).where(path_identity, op, value) 
+                self.curr_path = self.qe.at(identity).where(path_identity, op, value)"""
 
     def has_path(self, path):
         return True 
