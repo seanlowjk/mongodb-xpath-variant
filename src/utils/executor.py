@@ -4,6 +4,8 @@ from pyjsonq import JsonQ
 from genson import SchemaBuilder
 from pymongo import MongoClient
 
+from utils.constants import Axes
+
 class Executor:
     def __init__(self, json_file_path):
         self.json_file_path = json_file_path
@@ -58,15 +60,41 @@ class Executor:
                     schema_fields.add(path)      
 
         append_fields(schema)
-        print(sorted(schema_fields))
         return sorted(schema_fields)
 
     def evaluate_steps(self, steps):
+        def get_field(path, key):
+            if path == "":
+                return key 
+
+            return path + "." + key
+
+        schema = self.get_schema()
+        curr_levels = []
+
         for step in steps:
             if step.__class__.__name__ == "Path":
                 axes, attr = step.get_parts()
-                print(axes, attr)
-            
+                
+                if axes == Axes.CHILD.value: 
+                    if len(curr_levels) == 0:
+                        level = get_field("", attr)
+                        
+                        if level in schema: 
+                            curr_levels.append(level)
+                        else: 
+                            print("???")
+                            return 
+                    else: 
+                        level = get_field(level, attr)
+                        curr_levels = list(filter(lambda a: a.endswith(level), schema))
+
+        return curr_levels
+
+    def evaluate_json_data(self): 
+        path_steps = self.evaluate_steps()
+        
+                       
     def evaluate_data(self, levels, exprs, steps):
         expr_iter = 0
         self.curr_path = ''
