@@ -3,3 +3,6 @@ def get_full_path(path, attr):
         return attr 
 
     return path + "." + attr
+
+def split_path(path):
+    return path.split(".")

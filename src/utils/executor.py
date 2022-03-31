@@ -1,11 +1,8 @@
-from json import load, dumps
-from os import pathsep
-from numpy import identity
 from pyjsonq import JsonQ
 from genson import SchemaBuilder
 from pymongo import MongoClient
 
-from helpers.path import get_full_path
+from helpers.path import get_full_path, split_path
 from utils.constants import Axes
 
 class Executor:
@@ -79,6 +76,17 @@ class Executor:
                     else: 
                         level = get_full_path(level, attr)
                         curr_levels = list(filter(lambda a: a.endswith(level), schema))
+                elif axes == Axes.DESCENDANT.value: 
+                    if len(curr_levels) == 0: # If at root.
+                        curr_levels = list(filter(lambda a: a.endswith(attr), schema))
+                    else:
+                        temp_levels = []
+                    
+                        for curr_level in curr_levels:
+                            temp_levels = temp_levels + \
+                                list(filter(lambda a: a.startswith(curr_level) and a.endswith(attr), schema))
+                        
+                        curr_levels = temp_levels
 
         return curr_levels
 
@@ -87,27 +95,27 @@ class Executor:
             data = self.get_json_data_all()
 
         paths = self.evaluate_steps(steps)
-        results = data
+        if paths is None or len(paths) == 0:
+            return []
 
-        def split_path(path):
-            return path.split(".")
+        results = []
         
         for path in paths:
+            temp_results = data
             for step in split_path(path):
-                temp_data = []
+                temp_data = temp_results
+                temp_next = []
 
-                for temp in results:
+                for temp in temp_data:
                     if step in temp:
                         res = temp[step]
                         if type(res).__name__ == "list":
                             for res_elem in res: 
-                                temp_data.append(res_elem)
+                                temp_next.append(res_elem)
                         else: 
-                            temp_data.append(res)
+                            temp_next.append(res)
                 
-                results = temp_data
+                temp_results = temp_next
+            results = results + temp_results
 
         return results
-
-    def has_path(self, path):
-        return True 
