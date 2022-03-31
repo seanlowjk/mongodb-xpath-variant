@@ -9,3 +9,15 @@ while token is not None:
     token = tok.peek_next()
 
 print(tok.buffer)
+print()
+
+tok = Tokeniser("/child")
+token = tok.peek_next()
+
+while token is not None:
+    print(token)
+    token = tok.next()
+    token = tok.peek_next()
+
+print(tok.buffer)
+print()

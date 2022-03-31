@@ -161,7 +161,7 @@ class Parser:
         elif self.lexer.is_axis(tok):
             return self.eat_path(has_backslash)
         else:
-            return 
+            return Path("child::{}".format(tok))
 
 
     def eat_path(self, has_backslash=True):
@@ -338,7 +338,6 @@ class Parser:
                 expressions.append(expr)
                 steps.append(expr)
             else:
-                print(tok)
                 self.tokeniser.next()
 
         return paths, expressions, steps
