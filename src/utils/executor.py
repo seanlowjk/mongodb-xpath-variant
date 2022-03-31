@@ -87,7 +87,7 @@ class Executor:
                         if level in schema: 
                             curr_levels.append(level)
                         else: 
-                            print("???")
+                            print("Error in processing: ", level)
                             return 
                     else: 
                         level = get_field(level, attr)
