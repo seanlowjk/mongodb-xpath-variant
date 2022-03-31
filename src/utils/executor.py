@@ -6,7 +6,7 @@ from helpers.path import get_full_path, split_path
 from utils.constants import Axes
 
 class Executor:
-    def __init__(self, json_file_path, db="test", collection="library"):
+    def __init__(self, json_file_path="", db="test", collection="library"):
         self.json_file_path = json_file_path
         self.qe = JsonQ(self.json_file_path)
         self.builder = SchemaBuilder()
@@ -28,6 +28,7 @@ class Executor:
         return result
 
     def get_schema(self):
+        self.get_json_data()
         self.builder.add_object(self.json_data)        
         schema = self.builder.to_schema()
         if not "properties" in schema:

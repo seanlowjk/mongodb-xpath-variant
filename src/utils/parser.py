@@ -160,8 +160,10 @@ class Parser:
             return self.eat_token()
         elif self.lexer.is_axis(tok):
             return self.eat_path(has_backslash)
-        else:
+        elif not tok is None:
             return Path("child::{}".format(tok))
+        else: 
+            return Path("self::*")
 
 
     def eat_path(self, has_backslash=True):
