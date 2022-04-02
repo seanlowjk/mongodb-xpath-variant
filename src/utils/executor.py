@@ -2,7 +2,8 @@ from pyjsonq import JsonQ
 from genson import SchemaBuilder
 from pymongo import MongoClient
 
-from helpers.path import get_full_path, split_path
+from helpers.path import get_full_path
+from objects.schema import SchemaTree
 from utils.constants import Axes
 
 class Executor:
@@ -33,20 +34,15 @@ class Executor:
         schema = self.builder.to_schema()
         if not "properties" in schema:
             return []
-        schema_tree = {}
+        schema_tree = SchemaTree()
 
         def add_key(key, schema_tree=schema_tree):
-            if key is None or key == "":
+            if key is None:
                 return 
 
-            path = split_path(key)
-            for sub_path in path: 
-                if not sub_path in schema_tree:
-                    schema_tree[sub_path] = {}
+            schema_tree.add_path(key)
 
-                schema_tree = schema_tree[sub_path]
-
-        def append_fields(sub_schema, path=""):
+        def append_fields(sub_schema, path=[]):
             if "properties" not in sub_schema:
                 for attr in sub_schema:
                     if attr == "items":
@@ -140,7 +136,7 @@ class Executor:
         
         for path in paths:
             temp_results = data
-            for step in split_path(path):
+            for step in path:
                 temp_data = temp_results
                 temp_next = []
 

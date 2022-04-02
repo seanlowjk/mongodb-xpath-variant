@@ -1,6 +1,5 @@
 from utils.executor import Executor
 from utils.parser import Parser
-from sys import exit 
 
 inferencer = Executor("json/basic.json")
 data = inferencer.get_json_data()
@@ -8,7 +7,8 @@ data = inferencer.get_json_data()
 p = Parser('/songs/title')
 paths, exprs, steps = p.run() 
 
-print(inferencer.get_schema_tree())
+schema = inferencer.get_schema() 
+print(schema)
 """
 result = inferencer.evaluate_steps(steps)
 for res in result:
