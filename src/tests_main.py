@@ -4,14 +4,11 @@ from utils.parser import Parser
 inferencer = Executor("json/basic.json")
 data = inferencer.get_json_data()
 
-p = Parser('/songs/title')
+p = Parser('/title')
 paths, exprs, steps = p.run() 
 
 schema = inferencer.get_schema() 
-print(schema)
-"""
-result = inferencer.evaluate_steps(steps)
+
+result = inferencer.evaluate_json_data(steps)
 for res in result:
     print(res)
-"""
-

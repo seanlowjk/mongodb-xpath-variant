@@ -66,35 +66,33 @@ class Executor:
 
     def evaluate_steps(self, steps):
         schema = self.get_schema()
-        curr_levels = []
+        curr_nodes = [schema.root]
 
         for step in steps:
             if step.__class__.__name__ == "Path":
                 axes, attr = step.get_parts()
                 
                 if axes == Axes.CHILD.value: 
-                    if len(curr_levels) == 0: # If at root.
-                        level = get_full_path("", attr)
-                        
-                        if level in schema: 
-                            curr_levels.append(level)
-                        else: 
-                            print("Error in processing: ", level)
-                            return 
-                    else: 
-                        level = get_full_path(level, attr)
-                        curr_levels = list(filter(lambda a: a.endswith(level), schema))
+                    temp_nodes = []
+
+                    for node in curr_nodes: 
+                        temp_nodes = temp_nodes + node.get_children(attr)
+
+                    if len(temp_nodes) == 0:
+                        return []
+
+                    curr_nodes = temp_nodes
                 elif axes == Axes.DESCENDANT.value: 
-                    if len(curr_levels) == 0: # If at root.
-                        curr_levels = list(filter(lambda a: a.endswith(attr), schema))
-                    else:
-                        temp_levels = []
-                    
-                        for curr_level in curr_levels:
-                            temp_levels = temp_levels + \
-                                list(filter(lambda a: a.startswith(curr_level) and a.endswith(attr), schema))
-                        
-                        curr_levels = temp_levels
+                    temp_nodes = []
+
+                    for node in curr_nodes: 
+                        temp_nodes = temp_nodes + node.get_descendant(attr)
+
+                    if len(temp_nodes) == 0:
+                        return []
+
+                    curr_nodes = temp_nodes
+                """
                 elif axes == Axes.ANCESTOR.value:
                     if len(curr_level) == 0:
                         return 
@@ -117,26 +115,24 @@ class Executor:
                                 temp_levels.append(schema[i])
                         
                         curr_levels = temp_levels
-                       
+                """
                             
-
-
-
-        return curr_levels
+        return curr_nodes
 
     def evaluate_json_data(self, steps, data=None): 
         if data is None: 
             data = self.get_json_data_all()
 
-        paths = self.evaluate_steps(steps)
-        if paths is None or len(paths) == 0:
+        schemas = self.evaluate_steps(steps)
+        if schemas is None or len(schemas) == 0:
             return []
 
         results = []
-        
-        for path in paths:
+
+        for schema in schemas:
             temp_results = data
-            for step in path:
+
+            for step in schema.to_path():
                 temp_data = temp_results
                 temp_next = []
 
