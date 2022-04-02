@@ -99,6 +99,32 @@ class Executor:
                                 list(filter(lambda a: a.startswith(curr_level) and a.endswith(attr), schema))
                         
                         curr_levels = temp_levels
+                elif axes == Axes.ANCESTOR.value:
+                    if len(curr_level) == 0:
+                        return 
+                    else:
+                        temp_levels = []
+                        indexes = list()
+                        for curr_level in curr_levels:
+                            # crawl back
+                            curr_index = schema.index(curr_level)
+                            indexes.append(curr_index)
+                            # find all index of this node
+                            while (curr_index +1) < len(schema):
+                                curr_index = schema.index(curr_level, curr_index +1)
+                                indexes.append(curr_index)
+                        
+                        max_index = max(indexes)
+
+                        for i in range(0, max_index+1):
+                            if(schema[i].endswith(attr)):
+                                temp_levels.append(schema[i])
+                        
+                        curr_levels = temp_levels
+                       
+                            
+
+
 
         return curr_levels
 
