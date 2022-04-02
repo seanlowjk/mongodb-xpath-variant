@@ -86,7 +86,7 @@ class Executor:
                     temp_nodes = []
 
                     for node in curr_nodes: 
-                        temp_nodes = temp_nodes + node.get_descendant(attr)
+                        temp_nodes = temp_nodes + node.get_descendants(attr)
 
                     if len(temp_nodes) == 0:
                         return []

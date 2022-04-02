@@ -8,6 +8,9 @@ class SchemaNode:
         return "\n".join(self.get_all_to_string())
 
     def to_path(self):
+        """
+        Converts the node to a path for data retrieval. 
+        """
         if self.attr is None: # Means at Root
             return []
 
@@ -21,39 +24,54 @@ class SchemaNode:
         return path 
         
     def add_child(self, attr):
+        """
+        Adds a child node to the current node. 
+        """
         self.children[attr] = SchemaNode(attr, self, dict())
 
     def add_path(self, path=[]):
+        """
+        Adds a path to the current node. 
+        """
         if len(path) == 0:
             return 
 
         curr_path = path[0]
         if not curr_path in  self.children:
+            # Add a new child node if curr_path DOES NOT exist.
             self.add_child(curr_path)
 
         path.pop(0)
         self.children[curr_path].add_path(path)
 
-    def get_all_children(self):
-        return self.children.values()
-
     def get_children(self, attr): 
+        """
+        Gets the children of the current node. 
+        """
         for child_attr in self.children: 
             if child_attr == attr:
                 return [self.children[child_attr]]
 
         return []
 
-    def get_descendant(self, attr): 
+    def get_descendants(self, attr): 
+        """
+        Gets all the descendants of the current node. 
+        """
         descendants = self.get_children(attr)
 
         for child_attr in self.children: 
             child_node = self.children[child_attr]
-            descendants = descendants + child_node.get_descendant(attr)
+            descendants = descendants + child_node.get_descendants(attr)
         
         return descendants
 
     def to_string(self, tabs=0):
+        """
+        Gets its own strings representation as a string. 
+
+        Pads the front with tabs depending on the nesting level of the node.
+        """
         def get_string_repr():
             parent_key = "None" 
             if not self.parent is None: 
@@ -74,6 +92,10 @@ class SchemaNode:
         return (string_repr + get_string_repr())
 
     def get_all_to_string(self, strings_list=[], tabs=0):
+        """
+        Get strings representation of itself and its 
+        children in a list. 
+        """
         strings_list = strings_list + [self.to_string(tabs)]
         for child in self.children.values():
             strings_list = child.get_all_to_string(strings_list, tabs + 1)
