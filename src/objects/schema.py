@@ -77,6 +77,19 @@ class SchemaNode:
 
         return []
 
+    def get_ancestors(self, attr):
+        """
+        Gets the get_ancestors of the current node. 
+        """
+        ancestors = self.get_parent(attr)
+        parent_node = self.parent
+
+        while not parent_node is None: 
+            ancestors = ancestors + parent_node.get_parent(attr)
+            parent_node = parent_node.parent
+
+        return ancestors
+
     def to_string(self, tabs=0):
         """
         Gets its own strings representation as a string. 
