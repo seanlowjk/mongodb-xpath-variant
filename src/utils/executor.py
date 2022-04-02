@@ -32,9 +32,10 @@ class Executor:
         self.get_json_data()
         self.builder.add_object(self.json_data)        
         schema = self.builder.to_schema()
-        if not "properties" in schema:
-            return []
+
         schema_tree = SchemaTree()
+        if not "properties" in schema:
+            return schema_tree
 
         def add_key(key, schema_tree=schema_tree):
             if key is None:
