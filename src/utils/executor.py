@@ -33,18 +33,29 @@ class Executor:
         schema = self.builder.to_schema()
         if not "properties" in schema:
             return []
-        schema_fields = set()
+        schema_tree = {}
+
+        def add_key(key, schema_tree=schema_tree):
+            if key is None or key == "":
+                return 
+
+            path = split_path(key)
+            for sub_path in path: 
+                if not sub_path in schema_tree:
+                    schema_tree[sub_path] = {}
+
+                schema_tree = schema_tree[sub_path]
 
         def append_fields(sub_schema, path=""):
             if "properties" not in sub_schema:
                 for attr in sub_schema:
                     if attr == "items":
                         append_fields(sub_schema[attr], path)
-                        schema_fields.add(path)
+                        add_key(path)
                         return 
                     elif attr != "type":
-                        schema_fields.add(get_full_path(path, attr))
-                schema_fields.add(path)
+                        add_key(get_full_path(path, attr))
+                add_key(path)
             else:
                 sub_schema = sub_schema["properties"]
                 for attr in sub_schema:
@@ -52,10 +63,10 @@ class Executor:
                         append_fields(sub_schema[attr], get_full_path(path, attr))
 
                 if path != "":
-                    schema_fields.add(path)      
+                    add_key(path)     
 
         append_fields(schema)
-        return sorted(schema_fields)
+        return schema_tree
 
     def evaluate_steps(self, steps):
         schema = self.get_schema()
