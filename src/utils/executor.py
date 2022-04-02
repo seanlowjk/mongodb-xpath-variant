@@ -65,6 +65,15 @@ class Executor:
         return schema_tree
 
     def evaluate_steps(self, steps):
+        def call_api(curr_nodes, node_method):
+            output_nodes = []
+
+            for node in curr_nodes: 
+                func = getattr(node, node_method)
+                output_nodes = output_nodes + func(attr)
+
+            return output_nodes
+        
         schema = self.get_schema()
         curr_nodes = [schema.root]
 
@@ -73,25 +82,23 @@ class Executor:
                 axes, attr = step.get_parts()
                 
                 if axes == Axes.CHILD.value: 
-                    temp_nodes = []
-
-                    for node in curr_nodes: 
-                        temp_nodes = temp_nodes + node.get_children(attr)
-
-                    if len(temp_nodes) == 0:
+                    output_nodes = call_api(curr_nodes, "get_children")
+                    if len(output_nodes) == 0:
                         return []
 
-                    curr_nodes = temp_nodes
+                    curr_nodes = output_nodes
                 elif axes == Axes.DESCENDANT.value: 
-                    temp_nodes = []
-
-                    for node in curr_nodes: 
-                        temp_nodes = temp_nodes + node.get_descendants(attr)
-
-                    if len(temp_nodes) == 0:
+                    output_nodes = call_api(curr_nodes, "get_descendants")
+                    if len(output_nodes) == 0:
                         return []
 
-                    curr_nodes = temp_nodes
+                    curr_nodes = output_nodes
+                elif axes == Axes.PARENT.value: 
+                    output_nodes = call_api(curr_nodes, "get_parent")
+                    if len(output_nodes) == 0:
+                        return []
+
+                    curr_nodes = output_nodes
                 """
                 elif axes == Axes.ANCESTOR.value:
                     if len(curr_level) == 0:

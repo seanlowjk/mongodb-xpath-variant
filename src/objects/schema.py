@@ -47,6 +47,7 @@ class SchemaNode:
     def get_children(self, attr): 
         """
         Gets the children of the current node. 
+        Note that it is returned as a list. 
         """
         for child_attr in self.children: 
             if child_attr == attr:
@@ -65,6 +66,16 @@ class SchemaNode:
             descendants = descendants + child_node.get_descendants(attr)
         
         return descendants
+
+    def get_parent(self, attr):
+        """
+        Gets the parent of the current node. 
+        Note that it is returned as a list. 
+        """
+        if not self.parent is None and self.parent.attr == attr:
+            return [self.parent]
+
+        return []
 
     def to_string(self, tabs=0):
         """
