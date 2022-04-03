@@ -1,6 +1,7 @@
 from pyjsonq import JsonQ
 from genson import SchemaBuilder
 from pymongo import MongoClient
+from helpers.expression import evaluate
 
 from helpers.path import get_full_path
 from objects.schema import SchemaTree
@@ -14,8 +15,8 @@ class Executor:
 
         self.collection = MongoClient()[db][collection]
 
-    def get_json_data_all(self):
-        return list(self.collection.find())
+    def get_json_data_all(self, filters=[]):
+        return list(self.collection.find({ "$and": filters }, {}))
 
     def get_json_data(self):
         self.json_data = self.get_random_document()
@@ -65,7 +66,7 @@ class Executor:
         append_fields(schema)
         return schema_tree
 
-    def evaluate_steps(self, steps):
+    def evaluate_steps(self, steps):            
         def call_api(curr_nodes, node_method):
             output_nodes = []
 
@@ -77,6 +78,7 @@ class Executor:
         
         schema = self.get_schema()
         curr_nodes = [schema.root]
+        filters = []
 
         for step in steps:
             if step.__class__.__name__ == "Path":
@@ -85,37 +87,89 @@ class Executor:
                 if axes == Axes.CHILD.value: 
                     output_nodes = call_api(curr_nodes, "get_children")
                     if len(output_nodes) == 0:
-                        return []
+                        return [], []
 
                     curr_nodes = output_nodes
                 elif axes == Axes.DESCENDANT.value: 
                     output_nodes = call_api(curr_nodes, "get_descendants")
                     if len(output_nodes) == 0:
-                        return []
+                        return [], []
 
                     curr_nodes = output_nodes
                 elif axes == Axes.PARENT.value: 
                     output_nodes = call_api(curr_nodes, "get_parent")
                     if len(output_nodes) == 0:
-                        return []
+                        return [], []
 
                     curr_nodes = output_nodes
                 elif axes == Axes.ANCESTOR.value:
                     output_nodes = call_api(curr_nodes, "get_ancestors")
                     if len(output_nodes) == 0:
-                        return []
+                        return [], []
 
                     curr_nodes = output_nodes
-                                 
-        return curr_nodes
+            elif step.__class__.__name__ == "Expression":
+                path, op, value, _ = step.to_parts()
+                axes, attr = path.get_parts()
+                
+                if axes == Axes.CHILD.value: 
+                    output_nodes = call_api(curr_nodes, "get_children")
+                    if len(output_nodes) == 0:
+                        return [], []
+
+                    result_preds = []
+                    for output_node in output_nodes: 
+                        field_path = ".".join(output_node.to_path())
+                        evaluate_pred = evaluate(field_path, op, value)
+                        result_preds.append(evaluate_pred)
+                    
+                    filters.append({ "$or": result_preds })
+                elif axes == Axes.DESCENDANT.value: 
+                    output_nodes = call_api(curr_nodes, "get_descendants")
+                    if len(output_nodes) == 0:
+                        return [], []
+
+                    result_preds = []
+                    for output_node in output_nodes: 
+                        field_path = ".".join(output_node.to_path())
+                        evaluate_pred = evaluate(field_path, op, value)
+                        result_preds.append(evaluate_pred)
+                    
+                    filters.append({ "$or": result_preds })
+                elif axes == Axes.PARENT.value: 
+                    output_nodes = call_api(curr_nodes, "get_parent")
+                    if len(output_nodes) == 0:
+                        return [], []
+
+                    result_preds = []
+                    for output_node in output_nodes: 
+                        field_path = ".".join(output_node.to_path())
+                        evaluate_pred = evaluate(field_path, op, value)
+                        result_preds.append(evaluate_pred)
+                    
+                    filters.append({ "$or": result_preds })
+                elif axes == Axes.ANCESTOR.value:
+                    output_nodes = call_api(curr_nodes, "get_ancestors")
+                    if len(output_nodes) == 0:
+                        return [], []
+
+                    result_preds = []
+                    for output_node in output_nodes: 
+                        field_path = ".".join(output_node.to_path())
+                        evaluate_pred = evaluate(field_path, op, value)
+                        result_preds.append(evaluate_pred)
+                    
+                    filters.append({ "$or": result_preds })
+
+        return curr_nodes, filters
 
     def evaluate_json_data(self, steps, data=None): 
-        if data is None: 
-            data = self.get_json_data_all()
-
-        schemas = self.evaluate_steps(steps)
+        schemas, filters = self.evaluate_steps(steps)
         if schemas is None or len(schemas) == 0:
             return []
+
+        if data is None: 
+            data = self.get_json_data_all(filters) 
 
         results = []
 

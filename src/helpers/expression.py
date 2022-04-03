@@ -1,7 +1,9 @@
-def evaluate(value, op, value2):
-    if op == "=":
-        op = "=="
+MONGO_OP_DICT = {
+    "=": "$eq"
+}
 
-    eval_string = "x {} y".format(op)
-    eval_locals = { "x": value, "y": value2 }
-    return eval(eval_string, eval_locals)
+# { "songs.song.title": {"$eq": "Separuh Jiwaku Pergi" }
+def evaluate(field, op, value):
+    mongo_op = MONGO_OP_DICT[op]
+    filter = { field: { mongo_op: value }}
+    return filter

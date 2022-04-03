@@ -8,10 +8,9 @@ for expr in expressions: print(expr)
 print()
 """
 
-p = Parser('/songs')
+p = Parser('/child::songs[descendant::title="123"]')
 levels, expressions, steps = p.run() 
-for level in levels: print(level)
-for expr in expressions: print(expr)
+for step in steps: print(step)
 print()
 
 """
